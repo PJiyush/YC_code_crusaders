@@ -27,7 +27,8 @@ for x in [7, 11, 25]:
         velocity = randint(1, 4)
     )
 
-inter.lightstate['left'] = GREEN
+inter.setlight('left', GREEN)
+inter.setlight('up', GREEN)
 
 print(inter)
 
@@ -40,3 +41,4 @@ inter.updateframe()
 
 print(inter)
 inter.printcars()
+print()

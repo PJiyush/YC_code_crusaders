@@ -217,9 +217,9 @@ At t = {self.t}
                 └───┘ |  | {uf} |  |└─────┘
 ──────────────────────┘  └────┘  └──────────────────────
 
-           ┌────┐┌────┐         ┌────┐┌────┐
-           | {lb} || {lf} |         | {rf} || {rb} |
-           └────┘└────┘         └────┘└────┘
+           ┌────┐┌────┐          ┌────┐┌────┐
+           | {lb} || {lf} |          | {rf} || {rb} |
+           └────┘└────┘          └────┘└────┘
 
 ──────────────────────┐  ┌────┐  ┌──────────────────────
                ┌─────┐|  | {df} |  |┌───┐
@@ -234,3 +234,9 @@ At t = {self.t}
 
 
         return string
+    
+    def getcars(self) -> dict:
+        return self.carstate.copy()
+    
+    def setlight(self, light : str, state : GREEN | RED):
+        self.lightstate[light] = state
