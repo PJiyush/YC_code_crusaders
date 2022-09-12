@@ -1,4 +1,4 @@
-from code import interact
+from os import stat
 from random import randint
 from typing import Tuple
 
@@ -120,7 +120,8 @@ class Intersection:
             'position' : [x, y],
             'velocity' : velocity,
             'state' : MOVING,
-            'direction' : direction
+            'direction' : direction,
+            'exited' : False,
         }
 
         self.cars.append(car)
@@ -146,6 +147,20 @@ class Intersection:
                 
                 car['position'][0] += xmov
                 car['position'][1] += ymov
+    
+    def updateexits(self):
+        for car in self.cars:
+            dir = car['direction']
+            [x, y] = car['position']
+
+            if dir == (1, 0):
+                if x >= self.center[0]: car['exited'] = True
+            elif dir == (-1, 0):
+                if x <= self.center[0]: car['exited'] = True
+            elif dir == (0, 1):
+                if y >= self.center[1]: car['exited'] = True
+            elif dir == (0, -1):
+                if y <= self.center[1]: car['exited'] = True
 
     
     
@@ -163,6 +178,7 @@ class Intersection:
         else:
             for each in range(t): self.movecars()
             self.t += t
+        self.updateexits()
 
     def __repr__(self) -> str:
         string = ""
@@ -248,7 +264,7 @@ At t = {self.t}
     def setlight(self, light : str, state : GREEN | RED):
         self.lightstate[light] = state
         for car in self.carstate[light]:
-            car['state'] = state
+            if not car['exited']: car['state'] = state
     
     def green(self, light : str):
         self.setlight(light, GREEN)

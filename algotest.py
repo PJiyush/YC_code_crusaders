@@ -1,4 +1,3 @@
-from turtle import color
 from libs import *
 import matplotlib.pyplot as plt
 
@@ -10,21 +9,29 @@ import matplotlib.pyplot as plt
 ys = []
 xs = []
 
+k = 3
+
 for each in range(1, 50):
     xs.append(each)
+    y = 0
+    for x in range(k):
 
-    i = Intersection()
+        i = Intersection()
 
-    i.spawncars(n=10)
+        i.spawncars(n=10)
 
-    algo = SimpleCycle(i, period=each)
+        algo = SimpleCycle(i, period=each)
 
-    ys.append(algo.runsimulation(600, verbose = False))
+        y += (algo.runsimulation(250, verbose = False))
+    y /= k
+    ys.append(y)
 
 print(f'stopped at {i.t}', len(i.getstoppedcars()))
+# print(i)
+# i.printcars()
 
 plt.scatter(xs, ys, color='blue', alpha=0.4)
 plt.ylabel("Average waiting time")
 plt.xlabel("Period of light cycle")
-plt.title("Simple Cycle")
+plt.title(f"Simple Cycle, k = {k}")
 plt.show()
