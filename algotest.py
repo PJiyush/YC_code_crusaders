@@ -27,8 +27,7 @@ for each in range(1, 50):
     ys.append(y)
 
 print(f'stopped at {i.t}', len(i.getstoppedcars()))
-# print(i)
-# i.printcars()
+
 
 plt.scatter(xs, ys, color='blue', alpha=0.4)
 plt.ylabel("Average waiting time")
