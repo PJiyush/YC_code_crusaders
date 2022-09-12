@@ -1,4 +1,4 @@
-from pickle import STOP
+from code import interact
 from random import randint
 from typing import Tuple
 
@@ -156,9 +156,13 @@ class Intersection:
             for x in (self.carstate[each]):
                 print(x)
     
-    def updateframe(self) -> None:
-        self.t += 1
-        self.movecars()
+    def updateframe(self, t : int = None) -> None:
+        if t is None:
+            self.t += 1
+            self.movecars()
+        else:
+            for each in range(t): self.movecars()
+            self.t += t
 
     def __repr__(self) -> str:
         string = ""
@@ -238,5 +242,68 @@ At t = {self.t}
     def getcars(self) -> dict:
         return self.carstate.copy()
     
+    def getstoppedcars(self) -> list:
+        return list(filter(lambda x: x['state'] == STOPPED, self.cars))
+    
     def setlight(self, light : str, state : GREEN | RED):
         self.lightstate[light] = state
+        for car in self.carstate[light]:
+            car['state'] = state
+    
+    def green(self, light : str):
+        self.setlight(light, GREEN)
+    
+    def red(self, light : str):
+        self.setlight(light, RED)
+    
+    #note this is only for testing purposes
+    def spawncars(self, n : int = 5):
+        for i in range(n):
+            self.addcar(
+                position = [4 * randint(1, 4) , self.center[1]],
+                velocity = randint(1, 5)
+            )
+            self.addcar(
+                position = [self.center[1] + (4 * randint(1, 4)) , self.center[1]],
+                velocity = randint(1, 5)
+            )
+            self.addcar(
+                position = [self.center[0], 4 * randint(1, 4)],
+                velocity = randint(1, 5)
+            )
+            self.addcar(
+                position = [self.center[0], self.center[0] + (4 * randint(1, 4))],
+                velocity = randint(1, 5)
+            )
+
+
+class SimpleCycle:
+
+    def __init__(self, inter : Intersection, period : int = 10, clockwise : bool = True) -> None:
+        self.inter = inter
+        self.period = period
+        self.clockwise = True
+        self.order = ['up', 'right', 'down', 'left']
+        if not clockwise: self.order = self.order[::-1]
+    
+    def runsimulation(self, endtime : int = 100, verbose : bool = True) -> float:
+        waitedtime = 0
+
+        pointer = 0
+
+        self.inter.green(self.order[0])
+
+        for each in range(endtime):
+
+            if ((each % self.period) == 0) and (each != 0):
+                self.inter.red(self.order[pointer % 4])
+                pointer += 1
+                self.inter.green(self.order[pointer % 4])
+                if verbose: print(self.inter)
+
+
+            waitedtime += len(self.inter.getstoppedcars())
+            self.inter.updateframe()
+        
+        average = waitedtime/len(self.inter.getcars())
+        return average
