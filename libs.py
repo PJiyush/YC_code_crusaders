@@ -122,6 +122,7 @@ class Intersection:
             'state' : MOVING,
             'direction' : direction,
             'exited' : False,
+            'atintersection' : False,
         }
 
         self.cars.append(car)
@@ -140,10 +141,12 @@ class Intersection:
                     if (mod(ymov) >= mod(y - self.center[1])) and (self.lightstate[self.mapping[dir]] == RED):
                         ymov = self.center[1] - y - car['direction'][1]
                         car['state'] = STOPPED
+                        car['atintersection'] = True
                 else:
                     if (mod(xmov) >= mod(x - self.center[0])) and (self.lightstate[self.mapping[dir]] == RED):
                         xmov = self.center[0] - x - car['direction'][0]
                         car['state'] = STOPPED
+                        car['atintersection'] = True
                 
                 car['position'][0] += xmov
                 car['position'][1] += ymov
@@ -261,10 +264,26 @@ At t = {self.t}
     def getstoppedcars(self) -> list:
         return list(filter(lambda x: x['state'] == STOPPED, self.cars))
     
+    def getcarsatintersection(self) -> dict:
+        cai = self.carstate.copy()
+        for each in cai.keys():
+            cai[each] = list(filter(lambda x: x['atintersection'] == True, cai[each]))
+        return cai
+    
+    def getcarsinlane(self, lane : str, onlywaiting : bool = False) -> list:
+        cars = self.carstate[lane].copy()
+
+        cars = list(filter(lambda x: (x['exited'] == False) and (x['atintersection'] if onlywaiting else True), cars))
+
+        return cars
+
+    
     def setlight(self, light : str, state : GREEN | RED):
         self.lightstate[light] = state
         for car in self.carstate[light]:
-            if not car['exited']: car['state'] = state
+            if not car['exited']:
+                car['state'] = state
+                car['atintersection'] = bool(state)
     
     def green(self, light : str):
         self.setlight(light, GREEN)
@@ -277,19 +296,19 @@ At t = {self.t}
         for i in range(n):
             self.addcar(
                 position = [4 * randint(1, 4) , self.center[1]],
-                velocity = randint(1, 5)
+                velocity = randint(1, 6)
             )
             self.addcar(
-                position = [self.center[1] + (4 * randint(1, 4)) , self.center[1]],
-                velocity = randint(1, 5)
+                position = [(2 * self.center[0]) - (4 * randint(1, 4)) , self.center[1]],
+                velocity = randint(1, 6)
             )
             self.addcar(
                 position = [self.center[0], 4 * randint(1, 4)],
-                velocity = randint(1, 5)
+                velocity = randint(1, 6)
             )
             self.addcar(
-                position = [self.center[0], self.center[0] + (4 * randint(1, 4))],
-                velocity = randint(1, 5)
+                position = [self.center[0], (2 * self.center[1]) - (4 * randint(1, 4))],
+                velocity = randint(1, 6)
             )
 
 
@@ -323,3 +342,40 @@ class SimpleCycle:
         
         average = waitedtime/len(self.inter.getcars())
         return average
+
+
+class NetworkAlgorithm:
+
+    def __init__(self, inter : Intersection, onlywaiting : bool = True) -> None:
+        
+        self.inter = inter
+        self.onlywatiing = onlywaiting
+    
+    def getpriority(cars : dict, onlywaiting : bool = True) -> list:
+        p = list(map(
+            lambda x: (x, len(
+                list(filter(
+                    lambda y: (y['exited'] == False) and (y['atintersection'] if onlywaiting else True),
+                    cars[x]
+                ))
+            )),
+            cars.keys()))
+        p.sort(key=lambda x: x[1], reverse = True)
+        p = list(map(lambda x: x[0], p))
+        return p
+    
+
+    def runsimulation(self, endtime : int = 100) -> float:
+        waitedtime = 0
+
+        for i in range(endtime):
+
+            
+
+
+
+            waitedtime += len(self.inter.getstoppedcars())
+            self.inter.updateframe()
+        
+        avg = waitedtime/len(self.inter.getcars())
+        return avg
