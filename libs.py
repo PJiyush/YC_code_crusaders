@@ -1,4 +1,4 @@
-from os import stat
+from os import getpriority, stat
 from random import randint
 from typing import Tuple
 
@@ -320,6 +320,8 @@ class SimpleCycle:
         self.clockwise = True
         self.order = ['up', 'right', 'down', 'left']
         if not clockwise: self.order = self.order[::-1]
+
+        self.record = []
     
     def runsimulation(self, endtime : int = 100, verbose : bool = True) -> float:
         waitedtime = 0
@@ -329,6 +331,8 @@ class SimpleCycle:
         self.inter.green(self.order[0])
 
         for each in range(endtime):
+
+            self.record.append(self.inter.getcars().copy())
 
             if ((each % self.period) == 0) and (each != 0):
                 self.inter.red(self.order[pointer % 4])
@@ -346,10 +350,12 @@ class SimpleCycle:
 
 class NetworkAlgorithm:
 
-    def __init__(self, inter : Intersection, onlywaiting : bool = True) -> None:
+    def __init__(self, inter : Intersection, onlywaiting : bool = True, thresh : int = 20) -> None:
         
         self.inter = inter
         self.onlywatiing = onlywaiting
+        self.record = []
+        self.thresh = thresh
     
     def getpriority(cars : dict, onlywaiting : bool = True) -> list:
         p = list(map(
@@ -368,14 +374,37 @@ class NetworkAlgorithm:
     def runsimulation(self, endtime : int = 100) -> float:
         waitedtime = 0
 
+        done = []
+
+        lastdone = ''
+
+        pointer = 0
+
         for i in range(endtime):
 
+            self.record.append(self.inter.getcars().copy())
             
 
+            if (i - pointer >= self.thresh) or (self.inter.getcarsatintersection()[lastdone] == []):
+                if len(done) == 4: done = [lastdone]
+                
+                done.append(lastdone)
 
+                self.inter.red(lastdone)
+
+                priority = getpriority(self.inter.getcarstate(), self.onlywatiing)
+
+                priority = list(filter(lambda x: x not in done, priority))
+
+                lastdone = priority[0]
+
+                self.inter.green(lastdone)
+                
+                pointer = i
 
             waitedtime += len(self.inter.getstoppedcars())
             self.inter.updateframe()
+
         
         avg = waitedtime/len(self.inter.getcars())
         return avg

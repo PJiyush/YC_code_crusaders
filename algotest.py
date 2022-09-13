@@ -10,6 +10,7 @@ ys = []
 xs = []
 
 k = 3
+n=10
 
 for each in range(1, 50):
     xs.append(each)
@@ -18,7 +19,7 @@ for each in range(1, 50):
 
         i = Intersection()
 
-        i.spawncars(n=10)
+        i.spawncars(n=n)
 
         algo = SimpleCycle(i, period=each)
 
@@ -32,5 +33,5 @@ print(f'stopped at {i.t}', len(i.getstoppedcars()))
 plt.scatter(xs, ys, color='blue', alpha=0.4)
 plt.ylabel("Average waiting time")
 plt.xlabel("Period of light cycle")
-plt.title(f"Simple Cycle, k = {k}")
+plt.title(f"Simple Cycle, k = {k}, n = {n}")
 plt.show()
