@@ -1,5 +1,6 @@
 from random import randint
 from typing import Tuple
+from copy import deepcopy
 
 STOPPED = 0
 MOVING = 1
@@ -258,21 +259,32 @@ At t = {self.t}
         return string
     
     def getcars(self) -> dict:
-        return self.carstate.copy()
+        return deepcopy(self.carstate)
     
-    def getstoppedcars(self) -> list:
-        return list(filter(lambda x: x['state'] == STOPPED, self.cars))
+    def getstoppedcars(self) -> dict:
+        sc = deepcopy(self.carstate)
+        for x in sc.keys():
+            sc[x] = list(filter(lambda y: y['state'] == STOPPED, sc[x]))
+        return sc
     
     def getcarsatintersection(self) -> dict:
-        cai = self.carstate.copy()
+        cai = deepcopy(self.carstate)
         for each in cai.keys():
             cai[each] = list(filter(lambda x: x['atintersection'] == True, cai[each]))
         return cai
     
-    def getcarsinlane(self, lane : str, onlywaiting : bool = False) -> list:
-        cars = self.carstate[lane].copy()
+    def getcarsthatare(self, condition) -> dict:
+        cts = deepcopy(self.carstate)
 
-        cars = list(filter(lambda x: (x['exited'] == False) and (x['atintersection'] if onlywaiting else True), cars))
+        for each in cts.keys():
+            cts[each] = list(filter(condition, cts[each]))
+
+        return cts
+    
+    def getcarsinlane(self, lane : str, onlyatintersection : bool = False) -> list:
+        cars = deepcopy(self.carstate[lane])
+
+        cars = list(filter(lambda x: (x['exited'] == False) and (x['atintersection'] if onlyatintersection else True), cars))
 
         return cars
 
@@ -322,7 +334,11 @@ class SimpleCycle:
 
         self.record = []
     
+    def getrecord(self) -> list:
+        return self.record
+    
     def runsimulation(self, endtime : int = 100, verbose : bool = True) -> float:
+        self.record = []
         waitedtime = 0
 
         pointer = 0
@@ -331,7 +347,7 @@ class SimpleCycle:
 
         for each in range(endtime):
 
-            self.record.append(self.inter.getcars().copy())
+            self.record.append(deepcopy(self.inter.getcars()))
 
             if ((each % self.period) == 0) and (each != 0):
                 self.inter.red(self.order[pointer % 4])
@@ -349,18 +365,18 @@ class SimpleCycle:
 
 class NetworkAlgorithm:
 
-    def __init__(self, inter : Intersection, onlywaiting : bool = True, thresh : int = 20) -> None:
+    def __init__(self, inter : Intersection, onlyatintersection : bool = True, thresh : int = 20) -> None:
         
         self.inter = inter
-        self.onlywatiing = onlywaiting
+        self.onlywatiing = onlyatintersection
         self.record = []
         self.thresh = thresh
     
-    def getpriority(cars : dict, onlywaiting : bool = True) -> list:
+    def getpriority(cars : dict, onlyatintersection : bool = True) -> list:
         p = list(map(
             lambda x: (x, len(
                 list(filter(
-                    lambda y: (y['exited'] == False) and (y['atintersection'] if onlywaiting else True),
+                    lambda y: (y['exited'] == False) and (y['atintersection'] if onlyatintersection else True),
                     cars[x]
                 ))
             )),
@@ -369,8 +385,12 @@ class NetworkAlgorithm:
         p = list(map(lambda x: x[0], p))
         return p
     
+    def getrecord(self) -> list:
+        return self.record
+    
 
     def runsimulation(self, endtime : int = 100) -> float:
+        self.record = []
         waitedtime = 0
 
         done = []
@@ -381,17 +401,18 @@ class NetworkAlgorithm:
 
         for i in range(endtime):
 
-            self.record.append(self.inter.getcars().copy())
+            self.record.append(deepcopy(self.inter.getcars()))
             
 
-            if (i - pointer >= self.thresh) or (self.inter.getcarsatintersection()[lastdone] == []):
+            if (i - pointer >= self.thresh) or ((self.inter.getcarsatintersection()[lastdone] == []) if lastdone != '' else False):
                 if len(done) == 4: done = [lastdone]
                 
                 done.append(lastdone)
 
-                self.inter.red(lastdone)
+                try: self.inter.red(lastdone)
+                except KeyError: pass
 
-                priority = getpriority(self.inter.getcarstate(), self.onlywatiing)
+                priority = NetworkAlgorithm.getpriority(self.inter.getcars(), self.onlywatiing)
 
                 priority = list(filter(lambda x: x not in done, priority))
 
