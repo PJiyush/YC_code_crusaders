@@ -1,7 +1,7 @@
 
 import pygame as pyg
 pyg.init()
-
+#small change
 # suppose 4 cars are in lane1-->(1,0)
 alpha = (1,0)
 beta = (0,1)
