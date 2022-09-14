@@ -94,6 +94,9 @@ class Intersection:
         self.cars = []
         self.t = 0
     
+    def getlightstate(self) -> dict:
+        return deepcopy(self.lightstate)
+    
     def categorisecar(self, car):
 
         [x, y] = car['position']
@@ -130,7 +133,7 @@ class Intersection:
     
     def movecars(self) -> None:
         for car in self.cars:
-            if car['state'] == MOVING:
+            if (car['state'] == MOVING) and not car['exited']:
                 dir = car['direction']
 
                 xmov, ymov = car['velocity'] * car['direction'][0], car['velocity'] * car['direction'][1]
@@ -157,13 +160,21 @@ class Intersection:
             [x, y] = car['position']
 
             if dir == (1, 0):
-                if x >= self.center[0]: car['exited'] = True
+                if x >= self.center[0]:
+                    car['exited'] = True
+                    car['atintersection'] = False
             elif dir == (-1, 0):
-                if x <= self.center[0]: car['exited'] = True
+                if x <= self.center[0]:
+                    car['exited'] = True
+                    car['atintersection'] = False
             elif dir == (0, 1):
-                if y >= self.center[1]: car['exited'] = True
+                if y >= self.center[1]:
+                    car['exited'] = True
+                    car['atintersection'] = False
             elif dir == (0, -1):
-                if y <= self.center[1]: car['exited'] = True
+                if y <= self.center[1]:
+                    car['exited'] = True
+                    car['atintersection'] = False
 
     
     
@@ -291,10 +302,14 @@ At t = {self.t}
     
     def setlight(self, light : str, state : GREEN | RED):
         self.lightstate[light] = state
-        for car in self.carstate[light]:
-            if not car['exited']:
-                car['state'] = state
-                car['atintersection'] = bool(state)
+        # for car in self.carstate[light]:
+        #     if not car['exited']:
+        #         car['state'] = state
+        #         car['atintersection'] = bool(state)
+        cai = self.carstate[light].copy()
+        cai = list(filter(lambda x: x['atintersection'] == True, cai))
+        for car in cai:
+            car['state'] = state
     
     def green(self, light : str):
         self.setlight(light, GREEN)
@@ -365,10 +380,10 @@ class SimpleCycle:
 
 class NetworkAlgorithm:
 
-    def __init__(self, inter : Intersection, onlyatintersection : bool = True, thresh : int = 20) -> None:
+    def __init__(self, inter : Intersection, onlyatintersection : bool = True, thresh : int = 10) -> None:
         
         self.inter = inter
-        self.onlywatiing = onlyatintersection
+        self.onlywaiting = onlyatintersection
         self.record = []
         self.thresh = thresh
     
@@ -385,45 +400,64 @@ class NetworkAlgorithm:
         p = list(map(lambda x: x[0], p))
         return p
     
-    def getrecord(self) -> list:
+    def getrecord(self, listform : bool = False) -> list:
+        if listform:
+            record = []
+            for each in self.record:
+                record.append(
+                    each['up'] + each['down'] + each['left'] + each['right']
+                )
+            return record
         return self.record
+
     
 
-    def runsimulation(self, endtime : int = 100) -> float:
-        self.record = []
+    def runsimulation(self, endtime : int = 100, debug : bool = False, record : bool = True) -> float:
+        if record : self.record = []
         waitedtime = 0
 
         done = []
 
-        lastdone = ''
-
+        lastopenlane = 'up'
+        self.inter.green('up')
         pointer = 0
 
         for i in range(endtime):
 
-            self.record.append(deepcopy(self.inter.getcars()))
+            if record: self.record.append(deepcopy(self.inter.getcars()))
             
+            if debug: print(f"i = {i}, t = {self.inter.t}, {done}")
 
-            if (i - pointer >= self.thresh) or ((self.inter.getcarsatintersection()[lastdone] == []) if lastdone != '' else False):
-                if len(done) == 4: done = [lastdone]
+            if (i - pointer >= self.thresh) or (self.inter.getcarsatintersection()[lastopenlane] == []):
+                if debug: print(f"triggered at {self.inter.t}\n")
                 
-                done.append(lastdone)
+                if len(done) == 3: done = []
+                
 
-                try: self.inter.red(lastdone)
-                except KeyError: pass
+                # try: self.inter.red(lastlaneopen)
+                # except KeyError: pass
 
-                priority = NetworkAlgorithm.getpriority(self.inter.getcars(), self.onlywatiing)
+                self.inter.red(lastopenlane)
+
+                priority = NetworkAlgorithm.getpriority(self.inter.getcars(), self.onlywaiting)
 
                 priority = list(filter(lambda x: x not in done, priority))
 
-                lastdone = priority[0]
+                self.inter.green(priority[0])
 
-                self.inter.green(lastdone)
+                lastopenlane = priority[0]
+
+                done.append(priority[0])
                 
                 pointer = i
 
             waitedtime += len(self.inter.getstoppedcars())
             self.inter.updateframe()
+
+            if debug:
+                print(self.inter)
+                self.inter.printcars()
+                wait = input("Enter to move forward: ")
 
         
         avg = waitedtime/len(self.inter.getcars())

@@ -9,10 +9,10 @@ from copy import deepcopy
 y1s, y2s = [], []
 xs = []
 
-k = 5
+k = 3
 n=10
 
-for each in range(50, 150):
+for each in range(1, 50):
     xs.append(each)
     y1, y2 = 0, 0
     for x in range(k):
@@ -24,10 +24,10 @@ for each in range(50, 150):
         i2 = deepcopy(i)
 
         simplealgo = SimpleCycle(i, period=each)
-        complexalgo = NetworkAlgorithm(i2, thresh=each, onlywaiting=False)
+        complexalgo = NetworkAlgorithm(i2, thresh=each, onlyatintersection= True)
 
-        y1 += (simplealgo.runsimulation(250, verbose = False))
-        y2 += (complexalgo.runsimulation(250))
+        y1 += (simplealgo.runsimulation(150, verbose = False))
+        y2 += (complexalgo.runsimulation(150))
     y1 /= k
     y2 /= k
     y1s.append(y1)
@@ -35,6 +35,9 @@ for each in range(50, 150):
 
 print(f'stopped at {i.t}', len(i.getstoppedcars()))
 print(f'stopped at {i2.t}', len(i2.getstoppedcars()))
+
+print(i)
+i.printcars()
 
 
 plt.scatter(xs, y1s, color='blue', alpha=0.4)
