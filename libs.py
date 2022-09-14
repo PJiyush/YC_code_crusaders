@@ -1,4 +1,3 @@
-from os import getpriority, stat
 from random import randint
 from typing import Tuple
 
@@ -261,8 +260,10 @@ At t = {self.t}
     def getcars(self) -> dict:
         return self.carstate.copy()
     
-    def getstoppedcars(self) -> list:
-        return list(filter(lambda x: x['state'] == STOPPED, self.cars))
+    def getstoppedcars(self) -> dict:
+        sc = self.carstate.copy()
+        for x in sc.keys():
+            sc[x] = list(filter(lambda y: y['state'] == MOVING, sc[x]))
     
     def getcarsatintersection(self) -> dict:
         cai = self.carstate.copy()
@@ -385,14 +386,15 @@ class NetworkAlgorithm:
             self.record.append(self.inter.getcars().copy())
             
 
-            if (i - pointer >= self.thresh) or (self.inter.getcarsatintersection()[lastdone] == []):
+            if (i - pointer >= self.thresh) or ((self.inter.getcarsatintersection()[lastdone] == []) if lastdone != '' else False):
                 if len(done) == 4: done = [lastdone]
                 
                 done.append(lastdone)
 
-                self.inter.red(lastdone)
+                try: self.inter.red(lastdone)
+                except KeyError: pass
 
-                priority = getpriority(self.inter.getcarstate(), self.onlywatiing)
+                priority = NetworkAlgorithm.getpriority(self.inter.getcars(), self.onlywatiing)
 
                 priority = list(filter(lambda x: x not in done, priority))
 
