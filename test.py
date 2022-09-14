@@ -1,23 +1,22 @@
 from libs import *
 
 i = Intersection()
-i.green('right')
-i.spawncars(12)
-i.updateframe(10)
+i.spawncars(3)
+algo = NetworkAlgorithm(i)
 
-print(i)
-i.printcars()
+algo.runsimulation(50)
 
-# cai = i.getcarsatintersection()
-# for x in cai.keys():
-#     print(f"{x}:\n{cai[x]}")
-# print()
-c = i.getcars()
+print(len(algo.record))
+r = algo.getrecord()
 
-newc = {
-    'right' : c['right'],
-    'down' : c['down'],
-    'left' : c['left'],
-}
-
-print(NetworkAlgorithm.getpriority(newc))
+# for frame in r[:1]:
+for lane in r[48].keys():
+    print(lane)
+    for car in r[48][lane]:
+        print(car)
+print()
+print()
+for lane in r[49].keys():
+    print(lane)
+    for car in r[49][lane]:
+        print(car)
