@@ -349,10 +349,18 @@ class SimpleCycle:
 
         self.record = []
     
-    def getrecord(self) -> list:
+    def getrecord(self, listform : bool) -> list:
+        if listform:
+            record = []
+            for each in self.record:
+                record.append((
+                    each[0],
+                    each[1]['up'] + each[1]['down'] + each[1]['left'] + each[1]['right']
+                ))
+            return record
         return self.record
     
-    def runsimulation(self, endtime : int = 100, verbose : bool = True) -> float:
+    def runsimulation(self, endtime : int = 100, verbose : bool = False, debug : bool = False, record : bool = False) -> float:
         self.record = []
         waitedtime = 0
 
@@ -361,8 +369,11 @@ class SimpleCycle:
         self.inter.green(self.order[0])
 
         for each in range(endtime):
+            if debug: print(f"each = {each}, t = {self.inter.t}")
 
-            self.record.append(deepcopy(self.inter.getcars()))
+            
+            if record: self.record.append(( deepcopy(self.inter.lightstate) , deepcopy(self.inter.getcars())))
+
 
             if ((each % self.period) == 0) and (each != 0):
                 self.inter.red(self.order[pointer % 4])
@@ -370,6 +381,13 @@ class SimpleCycle:
                 self.inter.green(self.order[pointer % 4])
                 if verbose: print(self.inter)
 
+            if debug:
+                print(self.inter)
+                self.inter.printcars()
+                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
+                wait = input("Enter to move forward: ")
+                print()
+                print()
 
             waitedtime += len(self.inter.getstoppedcars())
             self.inter.updateframe()
@@ -400,13 +418,14 @@ class NetworkAlgorithm:
         p = list(map(lambda x: x[0], p))
         return p
     
-    def getrecord(self, listform : bool = False) -> list:
+    def getrecord(self, listform : bool) -> list:
         if listform:
             record = []
             for each in self.record:
-                record.append(
-                    each['up'] + each['down'] + each['left'] + each['right']
-                )
+                record.append((
+                    each[0],
+                    each[1]['up'] + each[1]['down'] + each[1]['left'] + each[1]['right']
+                ))
             return record
         return self.record
 
@@ -424,7 +443,7 @@ class NetworkAlgorithm:
 
         for i in range(endtime):
 
-            if record: self.record.append(deepcopy(self.inter.getcars()))
+            if record: self.record.append(( deepcopy(self.inter.lightstate) , deepcopy(self.inter.getcars())))
             
             if debug: print(f"i = {i}, t = {self.inter.t}, {done}")
 
@@ -457,7 +476,10 @@ class NetworkAlgorithm:
             if debug:
                 print(self.inter)
                 self.inter.printcars()
+                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
                 wait = input("Enter to move forward: ")
+                print()
+                print()
 
         
         avg = waitedtime/len(self.inter.getcars())
