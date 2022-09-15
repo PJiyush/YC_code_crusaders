@@ -1,4 +1,5 @@
 from operator import truediv
+from tkinter import Y
 from turtle import Screen
 from typing_extensions import Self
 from libs import *
@@ -117,23 +118,67 @@ traffic_signal_images_down = [pyg.image.load('red_light down.png'), pyg.image.lo
 
 # here we are going to operate traffic lights
 hello = Intersection()
-x = hello.getlightstate()
-hello.green('left')
-x = hello.getlightstate()
-hello.red('left')
-hello.green('up')
-x = hello.getlightstate()
+# x = hello.getlightstate()
+# hello.green('left')
+# x = hello.getlightstate()
+# hello.red('left')
+# hello.green('up')
+# x = hello.getlightstate()
+
+i = Intersection()
+i.spawncars(5)
+algo = SimpleCycle(i, period = 4)
+algo.runsimulation(endtime = 100, record=True)
+x = algo.getrecord(True)
+# x= x[0]
+
 
 
 
 clock = pyg.time.Clock()
 car1 = cars(32,58,(1,0),0)
 run =True
-while(run==True):
-    Background(x)
+count =0
+A = ['left','up','right','down']
+t1 = 1
+t2 = 2
+t3 = 3
+t4 = 4
+# while(run==True and count<t3 and count>=0):   # here I have to put condition on the basis of time
+while(run==True ):   # here I have to put condition on the basis of time
+    y=x[count][0]
+    # if(count<t1):
+    #     # hello.green(A[0])   # left lane is going and others are being stopped
+    #     # hello.red(A[1])
+    #     # hello.red(A[2])
+    #     # hello.red(A[3])
+        
+    #     # car1.movement()
+    #     pyg.time.delay(1000)
+    # elif(count>t1 and count<t2):
+    #     # hello.green(A[1])
+    #     # hello.red(A[2])
+    #     # hello.red(A[3])
+    #     # hello.red(A[0])
+    #     pyg.time.delay(1000)
+
+    # elif(count>t2 and count<t3):
+    #     # hello.green(A[2])
+    #     # hello.red(A[0])
+    #     # hello.red(A[3])
+    #     # hello.red(A[1])
+    #     pyg.time.delay(1000)
+    # else:
+    #     pyg.time.delay(1000)
+    #     # hello.green(A[3])
+    #     # hello.red(A[0])
+    #     # hello.red(A[2])
+    #     # hello.red(A[1])
+    # # x = hello.getlightstate()
     pyg.time.delay(100)
+    Background(y)
     for event in pyg.event.get():
         if(event.type == pyg.QUIT):
             run = False
-    
+    count = count+1
     pyg.display.update()
