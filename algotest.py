@@ -1,37 +1,41 @@
 from libs import *
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 
-# i.green('right')
 
-# print(i)
+k = 5
+n = 50
 
-ys = []
-xs = []
-
-k = 3
-n=10
+xs, ys, zs = [], [], []
 
 for each in range(1, 50):
     xs.append(each)
-    y = 0
+    y, z = 0, 0
     for x in range(k):
+        print(f"Current threshold is : {each}")
+        
+        i, j = Intersection(), Intersection()
 
-        i = Intersection()
+        i.spawncars(n = n)
+        j.spawncars(n = n)
 
-        i.spawncars(n=n)
+        nalgo = NetworkAlgorithm(i, thresh=each)
+        oalgo = SimpleCycle(j, period=each)
 
-        algo = SimpleCycle(i, period=each)
+        y += nalgo.runsimulation(endtime = 100, record = False)
+        z += oalgo.runsimulation(endtime = 100, record = False)
 
-        y += (algo.runsimulation(250, verbose = False))
-    y /= k
-    ys.append(y)
+    ys.append(y/k)
+    zs.append(z/k)
 
-print(f'stopped at {i.t}', len(i.getstoppedcars()))
+
 
 
 plt.scatter(xs, ys, color='blue', alpha=0.4)
+plt.scatter(xs, zs, color='green', alpha=0.4)
 plt.ylabel("Average waiting time")
 plt.xlabel("Period of light cycle")
-plt.title(f"Simple Cycle, k = {k}, n = {n}")
+plt.title(f"Performance Comparison, k = {k}, n = {n}")
+plt.legend(['Network', 'Simple'])
 plt.show()
