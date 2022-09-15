@@ -278,6 +278,16 @@ At t = {self.t}
             sc[x] = list(filter(lambda y: y['state'] == STOPPED, sc[x]))
         return sc
     
+    def getnumberofcars(self) -> int:
+        return len(self.cars)
+    
+    def getnumberofstoppedcars(self) -> int:
+        sc = self.getstoppedcars()
+        scn = 0
+        for x in sc.keys():
+            scn += len(sc[x])
+        return scn
+    
     def getcarsatintersection(self) -> dict:
         cai = deepcopy(self.carstate)
         for each in cai.keys():
@@ -384,15 +394,15 @@ class SimpleCycle:
             if debug:
                 print(self.inter)
                 self.inter.printcars()
-                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
+                print(f"Stopped cars : {(self.inter.getnumberofstoppedcars())}")
                 wait = input("Enter to move forward: ")
                 print()
                 print()
 
-            waitedtime += len(self.inter.getstoppedcars())
+            waitedtime += (self.inter.getnumberofstoppedcars())
             self.inter.updateframe()
         
-        average = waitedtime/len(self.inter.getcars())
+        average = waitedtime/(self.inter.getnumberofcars())
         return average
 
 
@@ -470,17 +480,17 @@ class NetworkAlgorithm:
                 
                 pointer = i
 
-            waitedtime += len(self.inter.getstoppedcars())
+            waitedtime += (self.inter.getnumberofstoppedcars())
             self.inter.updateframe()
 
             if debug:
                 print(self.inter)
                 self.inter.printcars()
-                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
+                print(f"Stopped cars : {(self.inter.getnumberofstoppedcars())}")
                 wait = input("Enter to move forward: ")
                 print()
                 print()
 
         
-        avg = waitedtime/len(self.inter.getcars())
+        avg = waitedtime/(self.inter.getnumberofcars())
         return avg

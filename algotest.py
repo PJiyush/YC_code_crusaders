@@ -2,68 +2,40 @@ from libs import *
 import matplotlib.pyplot as plt
 from copy import deepcopy
 
-# i.green('right')
-
-# print(i)
-
-# y1s, y2s = [], []
-# xs = []
-
-k = 3
-n=10
-
-# for each in range(1, 10):
-#     xs.append(each)
-#     y1, y2 = 0, 0
-
-#     for x in range(k):
-
-#         i, j = Intersection(), Intersection()
-
-#         i.spawncars(n=n)
-#         j.spawncars(n=n)
-
-#         simplealgo = SimpleCycle(i, period=each)
-#         complexalgo = NetworkAlgorithm(j, thresh=each, onlyatintersection= True)
-
-#         y1 += (simplealgo.runsimulation(150, verbose = False))
-#         y2 += (complexalgo.runsimulation(150))
 
 
-#     y1 /= k
-#     y2 /= k
+k = 5
+n = 50
 
-#     y1s.append(y1)
-#     y2s.append(y2)
+xs, ys, zs = [], [], []
 
-# print(f'stopped at {i.t}', len(i.getstoppedcars()))
-# print(f'stopped at {j.t}', len(j.getstoppedcars()))
-
-# print(i)
-# i.printcars()
-
-xs, ys = [], []
-
-for each in range(1, 11):
+for each in range(1, 50):
     xs.append(each)
+    y, z = 0, 0
+    for x in range(k):
+        print(f"Current threshold is : {each}")
+        
+        i, j = Intersection(), Intersection()
 
-    i = Intersection()
+        i.spawncars(n = n)
+        j.spawncars(n = n)
 
-    i.spawncars(n = 3)
+        nalgo = NetworkAlgorithm(i, thresh=each)
+        oalgo = SimpleCycle(j, period=each)
 
-    algo = NetworkAlgorithm(i, thresh=each)
+        y += nalgo.runsimulation(endtime = 100, record = False)
+        z += oalgo.runsimulation(endtime = 100, record = False)
 
-    y = algo.runsimulation(endtime = 20, debug=True)
-
-    ys.append(y)
+    ys.append(y/k)
+    zs.append(z/k)
 
 
 
 
 plt.scatter(xs, ys, color='blue', alpha=0.4)
-# plt.scatter(xs, y2s, color='green', alpha=0.4)
+plt.scatter(xs, zs, color='green', alpha=0.4)
 plt.ylabel("Average waiting time")
 plt.xlabel("Period of light cycle")
-plt.title(f"Algo Comparison, k = {k}, n = {n}")
-# plt.legend(['Simple', 'Network'])
+plt.title(f"Performance Comparison, k = {k}, n = {n}")
+plt.legend(['Network', 'Simple'])
 plt.show()
