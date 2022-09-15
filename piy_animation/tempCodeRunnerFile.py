@@ -1,2 +1,2 @@
-alpha = (1,0)
-beta = (0,1)
+for i in A:
+    #     car1.movement(340,i)

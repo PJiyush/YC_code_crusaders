@@ -1,4 +1,3 @@
-
 import pygame as pyg
 pyg.init()
 #small change
@@ -8,6 +7,8 @@ beta = (0,1)
 gamma = (-1,0)
 delta = (0,-1)
 
+clock1 = pyg.time.Clock()
+fps = 100
 A = []
 n_alpha = 3
 n_beta = 4
@@ -56,19 +57,19 @@ class cars():
         if(self.lane==1):
             self.path = [self.x,end]
             if(self.x<end+self.velocity):
-                self.x+=self.velocity
+                self.x+=(self.velocity)/2
         if(self.lane==2):
             self.path = [self.y,end]
             if(self.y<end+self.velocity):
-                self.y+=self.velocity
+                self.y+=(self.velocity)/2
         if(self.lane==3):
             self.path = [self.x,end]
             if(self.x>end+self.velocity):
-                self.x -= self.velocity
+                self.x -= (self.velocity)/2
         if(self.lane==4):
             self.path = [self.y,end]
             if(self.y> end+ self.velocity):
-                self.y -= self.velocity
+                self.y -= (self.velocity)/2
 
 
 # here remeber that the velocity is nothing but the distance
@@ -78,6 +79,7 @@ class cars():
 def updatingGameWin():
     # win.fill((0,0,0))
     win.blit(bg, (0,0))
+    clock1.tick(60)
     car1.draw(win)
     car2.draw(win)
     car3.draw(win)
@@ -90,7 +92,9 @@ car3 = cars(1440,340,gamma,1)
 car4 = cars(707,725,delta,1)
 
 while(run==True):
-    pyg.time.delay(100)
+    clock1.tick(80)
+    print(clock1.get_fps())
+    # pyg.time.delay(100)
     for event in pyg.event.get():
         if(event.type == pyg.QUIT):
             run = False
