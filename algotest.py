@@ -6,44 +6,62 @@ from copy import deepcopy
 
 # print(i)
 
-y1s, y2s = [], []
-xs = []
+# y1s, y2s = [], []
+# xs = []
 
 k = 3
 n=10
 
-for each in range(1, 50):
+# for each in range(1, 10):
+#     xs.append(each)
+#     y1, y2 = 0, 0
+
+#     for x in range(k):
+
+#         i, j = Intersection(), Intersection()
+
+#         i.spawncars(n=n)
+#         j.spawncars(n=n)
+
+#         simplealgo = SimpleCycle(i, period=each)
+#         complexalgo = NetworkAlgorithm(j, thresh=each, onlyatintersection= True)
+
+#         y1 += (simplealgo.runsimulation(150, verbose = False))
+#         y2 += (complexalgo.runsimulation(150))
+
+
+#     y1 /= k
+#     y2 /= k
+
+#     y1s.append(y1)
+#     y2s.append(y2)
+
+# print(f'stopped at {i.t}', len(i.getstoppedcars()))
+# print(f'stopped at {j.t}', len(j.getstoppedcars()))
+
+# print(i)
+# i.printcars()
+
+xs, ys = [], []
+
+for each in range(1, 11):
     xs.append(each)
-    y1, y2 = 0, 0
-    for x in range(k):
 
-        i = Intersection()
+    i = Intersection()
 
-        i.spawncars(n=n)
+    algo = NetworkAlgorithm(i, thresh=each)
 
-        i2 = deepcopy(i)
+    y = algo.runsimulation(endtime = 20, debug=True)
 
-        simplealgo = SimpleCycle(i, period=each)
-        complexalgo = NetworkAlgorithm(i2, thresh=each, onlyatintersection= True)
-
-        y1 += (simplealgo.runsimulation(150, verbose = False))
-        y2 += (complexalgo.runsimulation(150))
-    y1 /= k
-    y2 /= k
-    y1s.append(y1)
-    y2s.append(y2)
-
-print(f'stopped at {i.t}', len(i.getstoppedcars()))
-print(f'stopped at {i2.t}', len(i2.getstoppedcars()))
-
-print(i)
-i.printcars()
+    ys.append(y)
 
 
-plt.scatter(xs, y1s, color='blue', alpha=0.4)
-plt.scatter(xs, y2s, color='green', alpha=0.4)
+
+
+plt.scatter(xs, ys, color='blue', alpha=0.4)
+# plt.scatter(xs, y2s, color='green', alpha=0.4)
 plt.ylabel("Average waiting time")
 plt.xlabel("Period of light cycle")
-plt.title(f"Simple Cycle, k = {k}, n = {n}")
-plt.legend(['Simple Algorithm', 'Smart Algorithm'])
+plt.title(f"Algo Comparison, k = {k}, n = {n}")
+# plt.legend(['Simple', 'Network'])
 plt.show()

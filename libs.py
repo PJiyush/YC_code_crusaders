@@ -352,7 +352,7 @@ class SimpleCycle:
     def getrecord(self) -> list:
         return self.record
     
-    def runsimulation(self, endtime : int = 100, verbose : bool = True) -> float:
+    def runsimulation(self, endtime : int = 100, verbose : bool = False, debug : bool = False) -> float:
         self.record = []
         waitedtime = 0
 
@@ -361,6 +361,7 @@ class SimpleCycle:
         self.inter.green(self.order[0])
 
         for each in range(endtime):
+            if debug: print(f"each = {each}, t = {self.inter.t}")
 
             self.record.append(deepcopy(self.inter.getcars()))
 
@@ -370,6 +371,13 @@ class SimpleCycle:
                 self.inter.green(self.order[pointer % 4])
                 if verbose: print(self.inter)
 
+            if debug:
+                print(self.inter)
+                self.inter.printcars()
+                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
+                wait = input("Enter to move forward: ")
+                print()
+                print()
 
             waitedtime += len(self.inter.getstoppedcars())
             self.inter.updateframe()
@@ -457,7 +465,10 @@ class NetworkAlgorithm:
             if debug:
                 print(self.inter)
                 self.inter.printcars()
+                print(f"Stopped cars : {len(self.inter.getstoppedcars())}")
                 wait = input("Enter to move forward: ")
+                print()
+                print()
 
         
         avg = waitedtime/len(self.inter.getcars())
