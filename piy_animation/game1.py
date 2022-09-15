@@ -13,6 +13,10 @@ horizontal_track = {'yUpL': (0,307), 'yUpR': (1460,307), 'yDownL': (0,443), 'yDo
 vertical_track = {'xLeftU': (662,0), 'xLeftD': (662,750), 'xRightU': (798,0), 'xRightD': (798,750)}
 
 
+# important information
+vx = int(1460/120)
+vy = int(750/120)
+
 # cars
 cars_images = [pyg.image.load('blue_car.png'),pyg.image.load('purple_car.png'),pyg.image.load('red_car.png'),pyg.image.load('yellow_car.png')]
 
@@ -43,7 +47,7 @@ def Background(x:dict):
     elif(x['down']==0):
         screen.blit(traffic_signal_images_down[0],traffic_signal_cordinates['down'])
     
-    pyg.display.update()
+    # pyg.display.update()
 
 traffic_signal_cordinates ={
     'left':(580,220),
@@ -56,7 +60,7 @@ def updatingGameWin():
     # win.fill((0,0,0))
     # screen.blit(, (0,0))
     # clock1.tick(60)
-    car1.draw(screen)
+    car0.draw()
     # car2.draw(win)
     # car3.draw(win)
     # car4.draw(win)
@@ -92,93 +96,67 @@ class cars():
     def draw(self):
             screen.blit(self.image,(self.x, self.y))
     
-    def movement(self,end,state):   # for movement in lane 1
-        self.state = state
-        if(self.lane==1 and self.state==1):
-            self.path = [self.x,end]
-            if(self.x<end+self.velocity ):
-                self.x+=(self.velocity)/2
-        if(self.lane==2 and self.state==1):
-            self.path = [self.y,end]
-            if(self.y<end+self.velocity):
-                self.y+=(self.velocity)/2
-        if(self.lane==3 and self.state==1):
-            self.path = [self.x,end]
-            if(self.x>end+self.velocity):
-                self.x -= (self.velocity)/2
-        if(self.lane==4 and self.state==1):
-            self.path = [self.y,end]
-            if(self.y> end+ self.velocity):
-                self.y -= (self.velocity)/2
+    def movement(self,B,i):   # for movement in lane 1
+        self.x =B[i][0]
+        self.y =B[i][1]
+        # self.velocity = velocity
+        # self.y = self.y + self.velocity
+        updatingGameWin()
+        # print(A[i][0],A[i][1])
+        # cordinates = tuple([self.x,self.y])
+        # print(cordinates)
+        # screen.blit(self.image,cordinates)
+
+        
 
 traffic_signal_images_left = [pyg.image.load('red_light.png'), pyg.image.load('green light.png')]
 traffic_signal_images_up = [pyg.image.load('red_light up.png'), pyg.image.load('green light up.png')]
 traffic_signal_images_right = [pyg.image.load('red_light right.png'), pyg.image.load('green light right.png')]
 traffic_signal_images_down = [pyg.image.load('red_light down.png'), pyg.image.load('green light down.png')]
 
-# here we are going to operate traffic lights
-hello = Intersection()
-# x = hello.getlightstate()
-# hello.green('left')
-# x = hello.getlightstate()
-# hello.red('left')
-# hello.green('up')
-# x = hello.getlightstate()
-
 i = Intersection()
 i.spawncars(5)
 algo = SimpleCycle(i, period = 4)
 algo.runsimulation(endtime = 100, record=True)
-x = algo.getrecord(True)
-# x= x[0]
+timeline = algo.getrecord(True)
 
+B = []
+for lights,cars_ in timeline:
+    B.append(cars_[1]['position'])
 
+# print(A)
+for i in range(len(B)):
+    B[i][0] =B[i][0]*vx
+    B[i][0]-=68
+    B[i][1] = B[i][1]*vy
+    B[i][1]-=128
+# print(A)
+# print(A[-1])
 
 
 clock = pyg.time.Clock()
-car1 = cars(32,58,(1,0),0)
+car0 = cars(B[0][0],B[0][1],(0,1),0)
 run =True
 count =0
 A = ['left','up','right','down']
-t1 = 1
-t2 = 2
-t3 = 3
-t4 = 4
+# t1 = 1
+# t2 = 2
+# t3 = 3
+# t4 = 4
+maximum_timeline = len(timeline)
 # while(run==True and count<t3 and count>=0):   # here I have to put condition on the basis of time
-while(run==True ):   # here I have to put condition on the basis of time
-    y=x[count][0]
-    # if(count<t1):
-    #     # hello.green(A[0])   # left lane is going and others are being stopped
-    #     # hello.red(A[1])
-    #     # hello.red(A[2])
-    #     # hello.red(A[3])
-        
-    #     # car1.movement()
-    #     pyg.time.delay(1000)
-    # elif(count>t1 and count<t2):
-    #     # hello.green(A[1])
-    #     # hello.red(A[2])
-    #     # hello.red(A[3])
-    #     # hello.red(A[0])
-    #     pyg.time.delay(1000)
-
-    # elif(count>t2 and count<t3):
-    #     # hello.green(A[2])
-    #     # hello.red(A[0])
-    #     # hello.red(A[3])
-    #     # hello.red(A[1])
-    #     pyg.time.delay(1000)
-    # else:
-    #     pyg.time.delay(1000)
-    #     # hello.green(A[3])
-    #     # hello.red(A[0])
-    #     # hello.red(A[2])
-    #     # hello.red(A[1])
-    # # x = hello.getlightstate()
-    pyg.time.delay(100)
-    Background(y)
+while(run==True and count<maximum_timeline):   # here I have to put condition on the basis of time
     for event in pyg.event.get():
         if(event.type == pyg.QUIT):
             run = False
+
+    y=timeline[count][0]
+    car0.movement(B,count)
+    # car0.movement(timeline[0][1][0]['velocity'])
+    updatingGameWin()
     count = count+1
-    pyg.display.update()
+    pyg.time.delay(500)
+    Background(y)
+    # pyg.display.update()
+
+# 
