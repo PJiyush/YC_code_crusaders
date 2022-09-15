@@ -49,6 +49,8 @@ for each in range(1, 11):
 
     i = Intersection()
 
+    i.spawncars(n = 3)
+
     algo = NetworkAlgorithm(i, thresh=each)
 
     y = algo.runsimulation(endtime = 20, debug=True)
