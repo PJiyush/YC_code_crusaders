@@ -1,2 +1,2 @@
-
-        # self.y = self.y + self.velocity
+else:
+            #     self.x
