@@ -1,5 +1,16 @@
 import pygame
-import math
+# import time
+from libs import *
+
+num_cars = 10
+time_period = 30
+
+# touseef = Intersection()
+# touseef.spawncars(num_cars)
+
+# algo = SimpleCycle(touseef, time_period)
+# algo.runsimulation()
+# records = algo.getrecord(listform=False)
 
 pygame.init()
 screen = pygame.display.set_mode((1460, 750))
@@ -21,6 +32,21 @@ carImagesUp = {'blue':'./cars/up/blue.png', 'black':'./cars/up/black.png', 'gree
 carImagesDown = {'blue':'./cars/down/blue.png', 'black':'./cars/down/black.png', 'green':'./cars/down/green.png', 'orange':'./cars/down/orange.png',
 'red':'./cars/down/red.png'}
 
+carImages = {
+    'left': {'blue':'./cars/left/blue.png', 'black':'./cars/left/black.png', 'green':'./cars/left/green.png', 'orange':'./cars/left/orange.png', 'red':'./cars/left/red.png'},
+    'right': {'blue':'./cars/right/blue.png', 'black':'./cars/right/black.png', 'green':'./cars/right/green.png', 'orange':'./cars/right/orange.png', 'red':'./cars/right/red.png'},
+    'up': {'blue':'./cars/up/blue.png', 'black':'./cars/up/black.png', 'green':'./cars/up/green.png', 'orange':'./cars/up/orange.png', 'red':'./cars/up/red.png'},
+    'down': {'blue':'./cars/down/blue.png', 'black':'./cars/down/black.png', 'green':'./cars/down/green.png', 'orange':'./cars/down/orange.png', 'red':'./cars/down/red.png'}
+}
+
+#velocities
+vX = int(1460/120)
+vY = int(750/120)
+
+'''
+index varies from 0 to (num_cars - 1)
+'''
+
 #car object
 class carObject:
     def __init__(self, x, y, lane, img):
@@ -36,10 +62,8 @@ class carObject:
         elif self.lane == 'down':
             self.img = pygame.image.load(carImagesDown[img])
 
-
     def draw_car(self):
         screen.blit(self.img, (self.x, self.y))
-
 
 dist_tf = 30
 dist_car = 10
@@ -60,19 +84,19 @@ class traffic_lights:
         if self.orientation == 'horizontal':
             pygame.draw.rect(screen, (0, 0, 0), (self.x - 100, self.y - 40, self.height, self.width))
             if self.state == 0:
-                pygame.draw.circle(screen, (10, 28, 12), (self.x - 50, self.y), 35)
-                pygame.draw.circle(screen, (255, 0, 0), (self.x + 50, self.y), 35)
+                pygame.draw.circle(screen, (10, 28, 12), (self.x - 50, self.y), self.radius)
+                pygame.draw.circle(screen, (255, 0, 0), (self.x + 50, self.y), self.radius)
             else:
-                pygame.draw.circle(screen, (0, 255, 0), (self.x - 50, self.y), 35)
-                pygame.draw.circle(screen, (32, 12, 12), (self.x + 50, self.y), 35)
+                pygame.draw.circle(screen, (0, 255, 0), (self.x - 50, self.y), self.radius)
+                pygame.draw.circle(screen, (32, 12, 12), (self.x + 50, self.y), self.radius)
         if self.orientation == 'vertical':
             pygame.draw.rect(screen, (0, 0, 0), (self.x - 40, self.y - 100, self.width, self.height))
             if self.state == 0:
-                pygame.draw.circle(screen, (10, 28, 12), (self.x, self.y - 50), 35)
-                pygame.draw.circle(screen, (255, 0, 0), (self.x, self.y + 50), 35)
+                pygame.draw.circle(screen, (10, 28, 12), (self.x, self.y - 50), self.radius)
+                pygame.draw.circle(screen, (255, 0, 0), (self.x, self.y + 50), self.radius)
             else:
-                pygame.draw.circle(screen, (0, 255, 0), (self.x, self.y - 50), 35)
-                pygame.draw.circle(screen, (32, 12, 12), (self.x, self.y + 50), 35)
+                pygame.draw.circle(screen, (0, 255, 0), (self.x, self.y - 50), self.radius)
+                pygame.draw.circle(screen, (32, 12, 12), (self.x, self.y + 50), self.radius)
 
 
 # traffic lights using the coordinates of their centres
@@ -81,6 +105,7 @@ tfRD = traffic_lights(798+(40+dist_tf), 443+(100+dist_tf), 0, 'vertical')
 tfLD = traffic_lights(662-(100+dist_tf), 443+(40+dist_tf), 0, 'horizontal')
 tfRU = traffic_lights(798+(100+dist_tf), 307-(40+dist_tf), 0, 'horizontal')
 
+'''
 #left lane using coordinates of corners of the cars
 carL1 = carObject(662 - 48 - dist_car, 375 - (1 + 32 + 2 + 32), 'left', 'red')
 carL2 = carObject(662 - 48 - dist_car, 375 - (1 + 32), 'left', 'green')
@@ -104,10 +129,18 @@ carD1 = carObject(730 - (1 + 32 + 2 + 32), 443 + dist_car, 'down', 'blue')
 carD2 = carObject(730 - (1 + 32), 443 + dist_car, 'down', 'green')
 carD3 = carObject(730 + (1), 443 + dist_car, 'down', 'orange')
 carD4 = carObject(730 + (1 + 32 + 1), 443 + dist_car, 'down', 'red')
+'''
 
+img = pygame.image.load(carImages['left']['blue'])
+x = 5 * vX
+y = 60 * vY
+def car_temp():
+    screen.blit(img, (x,y))
 
 run = True
+#while run and x <= 730:
 while run:
+    pygame.time.delay(100)
     screen.fill((255, 255, 255))
     #screen.blit(background, (0,0))
 
@@ -127,22 +160,9 @@ while run:
     tfLD.draw_traffic_lights()
     tfRD.draw_traffic_lights()
 
-    carL1.draw_car()
-    carL2.draw_car()
-    carL3.draw_car()
-    carL4.draw_car()
-    carR1.draw_car()
-    carR2.draw_car()
-    carR3.draw_car()
-    carR4.draw_car()
-    carU1.draw_car()
-    carU2.draw_car()
-    carU3.draw_car()
-    carU4.draw_car()
-    carD1.draw_car()
-    carD2.draw_car()
-    carD3.draw_car()
-    carD4.draw_car()
+    if(x < 662 - 48 - dist_car - vX):
+        x += vX
+    car_temp()
 
     pygame.display.update()
 
