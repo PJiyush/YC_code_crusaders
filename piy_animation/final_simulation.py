@@ -1,6 +1,7 @@
-
+import random
 from libs import *
 import pygame as pyg
+import numpy as np
 pyg.init()
 
 screen = pyg.display.set_mode((1460,750))
@@ -15,7 +16,7 @@ vx = int(1460/120)
 vy = int(750/120)
 
 # cars
-cars_images = [pyg.image.load('blue_car.png'),pyg.image.load('purple_car.png'),pyg.image.load('red_car.png'),pyg.image.load('yellow_car.png')]
+cars_images = [pyg.image.load('blue_car_bg.png'),pyg.image.load('purple_car_bg.png'),pyg.image.load('red_car_bg.png'),pyg.image.load('yellow_car_bg.png'),pyg.image.load('blueCar.png'),pyg.image.load('greenCar.png'),pyg.image.load('redCar.png')]
 
 def Background(x:dict):
     
@@ -63,6 +64,10 @@ def updatingGameWin(dict1):
     # here draw each object
     pyg.display.update()
 
+y_pos_1 = [12,8,4,-10,-7]
+y_pos = [2,1,0,-1,2]
+x_pos_1 = [2,1,0,-1,2]
+x_pos = [2,1,0,-1,2]
 
 class cars():
     def __init__(self,x,y,location,num): 
@@ -77,23 +82,37 @@ class cars():
             self.lane = 1
             self.image = pyg.transform.rotate(self.image,270)
             
+            
         elif(first==0 and second==1):
             self.lane = 2
             self.image = pyg.transform.rotate(self.image,180)
+            # self.x = self.x + x_pos[random.randint(0,4)]
             
         elif(first==-1 and second==0):
             self.lane = 3
             self.image = pyg.transform.rotate(self.image,90)
-            
+            # self.y = self.y + y_pos[random.randint(0,4)]
             
         else:
             self.lane = 4
             self.image = self.image
+            # self.x = self.x + x_pos[random.randint(0,4)]
             
     def draw(self):
             self.image = pyg.transform.scale(self.image,(32,32))
-            
+            # if(self.lane==1):
+                # screen.blit(self.image,(self.x,self.y+ y_pos_1[random.randint(0,4)]))
             screen.blit(self.image,(self.x,self.y))
+            # elif(self.lane==2):
+            #     screen.blit(self.image,(self.x+x_pos_1[random.randint(0,4)],self.y))
+            # elif(self.lane==3):
+            #     screen.blit(self.image,(self.x,self.y+ y_pos_1[random.randint(0,4)]))
+            # else:
+            #     screen.blit(self.image,(self.x+x_pos_1[random.randint(0,4)],self.y))
+
+            
+
+            # elif(self.lane==2)
     
     # def movement(self,B,i):   
     def movement(self,position,exit,intersection,state):
@@ -104,13 +123,14 @@ class cars():
                 self.x = (x_cordinate)*vx
                 self.y = (y_cordinate)*vy
                 if(self.lane ==1):
-                    self.x = self.x - 150
+                    self.x = self.x - 90
+                    
                 elif(self.lane==2):
-                    self.y = self.y - 150
+                    self.y = self.y - 100
                 elif(self.lane==3):
-                    self.x = self.x + 150
+                    self.x = self.x + 300
                 else:
-                    self.y = self.y + 150
+                    self.y = self.y + 100
                 # self.draw()
             # else:
                 # self.x
@@ -146,17 +166,31 @@ traffic_signal_images_right = [pyg.image.load('red_light right.png'), pyg.image.
 traffic_signal_images_down = [pyg.image.load('red_light down.png'), pyg.image.load('green light down.png')]
 
 
+# this is one is for simple cycle and this is the working algo part which would be caarry on forward in the while loop
 t = 100
 i = Intersection()
-no_of_cars_in_a_lane = 5
+no_of_cars_in_a_lane = 10
 i.spawncars(no_of_cars_in_a_lane)
-algo = SimpleCycle(i, period = 4)
+
+# this is a simple cycle
+
+# algo = SimpleCycle(i, period = 4)
+# algo.runsimulation(endtime = t, record=True)
+# timeline = algo.getrecord(True) # now this algo contains information of no of cars
+# car_object_list = []
+# for i in range((no_of_cars_in_a_lane)*4):
+#     car_object_list.append(cars(timeline[0][1][i]['position'][0],timeline[0][1][i]['position'][1],timeline[0][1][i]['direction'],i%4))
+
+
+# network cycle
+
+algo = NetworkAlgorithm(i, True,10)
 algo.runsimulation(endtime = t, record=True)
 timeline = algo.getrecord(True) # now this algo contains information of no of cars
 car_object_list = []
 for i in range((no_of_cars_in_a_lane)*4):
-    car_object_list.append(cars(timeline[0][1][i]['position'][0],timeline[0][1][i]['position'][1],timeline[0][1][i]['direction'],i%4))
-# print(car_object_list)
+    car_object_list.append(cars(timeline[0][1][i]['position'][0],timeline[0][1][i]['position'][1],timeline[0][1][i]['direction'],i%7))
+
 
 position_of_each_car_at_that_time = []
 exit_of_each_car_at_that_time = []
@@ -172,6 +206,7 @@ for i in range(t):
         exit_of_each_car_at_that_time[i].append(timeline[i][1][j]['exited'])
         Intersection[i].append(timeline[i][1][j]['atintersection'])
         state_of_cars[i].append(timeline[i][1][j]['state'])
+
 
 print(len(position_of_each_car_at_that_time))
 print(len(exit_of_each_car_at_that_time))
@@ -215,9 +250,9 @@ while(run==True and count<maximum_timeline):   # here I have to put condition on
         if(event.type == pyg.QUIT):
             run = False
 
-    y=timeline[count][0]
+    y_light=timeline[count][0]
     for i in range(len(car_object_list)):
-        (car_object_list[i]).movement(position_of_each_car_at_that_time[count][i],exit_of_each_car_at_that_time[count][i],Intersection[count][i],state_of_cars[count][i])
+        (car_object_list[i]).movement(np.add(position_of_each_car_at_that_time[count][i],[x_pos[random.randint(0,4)],y_pos[random.randint(0,4)]]),exit_of_each_car_at_that_time[count][i],Intersection[count][i],state_of_cars[count][i])
         # (car_object_list[i]).draw()
         updatingGameWin(car_object_list)
     # car0.movement(B,count)
@@ -226,7 +261,7 @@ while(run==True and count<maximum_timeline):   # here I have to put condition on
     # updatingGameWin(car_object_list)
     count = count+1
     pyg.time.delay(500)
-    Background(y)
+    Background(y_light)
     # pyg.display.update()
 
 # 
